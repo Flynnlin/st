@@ -24,8 +24,11 @@ compiler.run((err, stats) => {
     const outputDir = config.output.path;
     const outputFile = config.output.filename;
     const sourcePath = path.join(outputDir, outputFile);
-    const targetDir = path.resolve('public/dist');
-    const targetPath = path.join(targetDir, outputFile);
+
+    // Overwrite the raw public/lib.js with the compiled bundle.
+    // Vercel serves static files from public/ directly, bypassing
+    // Express middleware, so the compiled bundle must replace the source.
+    const publicLibPath = path.resolve('public/lib.js');
 
     if (!fs.existsSync(sourcePath)) {
         console.error(`Output file not found: ${sourcePath}`);
@@ -33,9 +36,14 @@ compiler.run((err, stats) => {
         return;
     }
 
-    fs.mkdirSync(targetDir, { recursive: true });
-    fs.copyFileSync(sourcePath, targetPath);
-    console.log(`Copied to ${targetPath}`);
+    // Backup original manifest headers for dynamic imports
+    const original = fs.readFileSync(publicLibPath, 'utf-8');
+    const manifestMatch = original.match(/\/\*\*[\s\S]*?\*\/\s*/);
+    const header = manifestMatch ? manifestMatch[0] : '';
+
+    const compiled = fs.readFileSync(sourcePath, 'utf-8');
+    fs.writeFileSync(publicLibPath, header + compiled);
+    console.log(`Overwrote public/lib.js with compiled bundle (${compiled.length} bytes)`);
 
     compiler.close(() => {
         console.log('Build complete.');

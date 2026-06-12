@@ -4,14 +4,6 @@
     "framework": null,
     "rewrites": [
         {
-            "source": "/lib.js",
-            "destination": "/dist/lib.js"
-        },
-        {
-            "source": "/css/user.css",
-            "destination": "/dist/user.css"
-        },
-        {
             "source": "/(.*)",
             "destination": "/server.js"
         }
