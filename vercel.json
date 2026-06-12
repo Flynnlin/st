@@ -1,0 +1,13 @@
+{
+    "buildCommand": null,
+    "devCommand": null,
+    "installCommand": "npm install --omit=dev --omit=optional",
+    "outputDirectory": null,
+    "framework": null,
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/server.js"
+        }
+    ]
+}
