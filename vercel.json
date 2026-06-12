@@ -1,7 +1,5 @@
 {
-    "buildCommand": null,
-    "devCommand": null,
-    "installCommand": "npm install --omit=dev --omit=optional",
+    "buildCommand": "npm run build",
     "outputDirectory": null,
     "framework": null,
     "rewrites": [

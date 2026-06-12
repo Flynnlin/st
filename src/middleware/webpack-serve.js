@@ -1,6 +1,8 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import webpack from 'webpack';
 import getPublicLibConfig from '../../webpack.config.js';
+import { serverDirectory } from '../server-directory.js';
 
 export default function getWebpackServeMiddleware() {
     /**
@@ -11,12 +13,19 @@ export default function getWebpackServeMiddleware() {
      * @type {import('express').RequestHandler}
      */
     function devMiddleware(req, res, next) {
-        const publicLibConfig = getPublicLibConfig();
-        const outputPath = publicLibConfig.output?.path;
-        const outputFile = publicLibConfig.output?.filename;
         const parsedPath = path.parse(req.path);
 
-        if (req.method === 'GET' && parsedPath.dir === '/' && parsedPath.base === outputFile) {
+        if (req.method === 'GET' && parsedPath.dir === '/' && parsedPath.base === 'lib.js') {
+            // Pre-built lib.js for Vercel / serverless environments
+            const prebuiltPath = path.join(serverDirectory, 'public', 'dist', 'lib.js');
+            if (fs.existsSync(prebuiltPath)) {
+                res.type('application/javascript');
+                return res.sendFile(prebuiltPath);
+            }
+
+            const publicLibConfig = getPublicLibConfig();
+            const outputPath = publicLibConfig.output?.path;
+            const outputFile = publicLibConfig.output?.filename;
             return res.sendFile(outputFile, { root: outputPath });
         }
 
